@@ -29,7 +29,7 @@ class ShibbolethRemoteUserMiddleware(RemoteUserMiddleware):
         if request.user.is_authenticated():
             if request.user.username == self.clean_username(username, request):
                 return
-        
+
         #Make sure we have all required Shiboleth elements before proceeding.
         shib_meta, error = parse_attributes(request.META)
         #Add parsed attributes to the session.
@@ -37,7 +37,7 @@ class ShibbolethRemoteUserMiddleware(RemoteUserMiddleware):
         if error:
             raise ShibbolethValidationError("All required Shibboleth elements"
                                             " not found.  %s" % shib_meta)
-        
+
         # We are seeing this user for the first time in this session, attempt
         # to authenticate the user.
         user = auth.authenticate(remote_user=username)
@@ -53,7 +53,7 @@ class ShibbolethRemoteUserMiddleware(RemoteUserMiddleware):
             user.save()
             #call make profile.
             self.make_profile(user, shib_meta)
-            
+
     def make_profile(self, user, shib_meta):
         """
         This is here as a stub to allow subclassing of ShibbolethRemoteUserMiddleware
@@ -61,8 +61,8 @@ class ShibbolethRemoteUserMiddleware(RemoteUserMiddleware):
         from the Shib provided attributes.  By default it does noting.
         """
         return
-    
-    
+
+
 def parse_attributes(META):
     """
     From: https://github.com/russell/django-shibboleth/blob/master/django_shibboleth/utils.py
