@@ -2,6 +2,8 @@ from django.conf import settings
 from django.contrib.auth.middleware import RemoteUserMiddleware
 from django.contrib import auth
 from django.core.exceptions import ImproperlyConfigured
+import hashlib
+import re
 
 #from app_settings import SHIB_ATTRIBUTE_MAP, SHIB_MOCK_HEADERS
 
@@ -18,6 +20,10 @@ class ShibbolethRemoteUserMiddleware(RemoteUserMiddleware):
                 " before the RemoteUserMiddleware class.")
         try:
             username = request.META[self.header]
+            username_regex = re.compile('[^\w.@+-]|.{31}', re.IGNORECASE)
+
+            if username_regex.match(username):  # invalid username
+                username = hashlib.md5(username).hexdigest()[:30]
         except KeyError:
             # If specified header doesn't exist then return (leaving
             # request.user set to AnonymousUser by the
