@@ -58,7 +58,7 @@ class ShibbolethRemoteUserMiddleware(RemoteUserMiddleware):
                     profile.set_school_name("Glow Scotland School")
 
                 # Give them the good shit
-                package = SubscriptionPackage.published_to_site.get(title="All of Twig (GLOW)")
+                package = SubscriptionPackage.objects.get(title="All of Twig (GLOW)")
                 sub_length = SubscriptionLength.objects.get(title="Glow single day")
 
                 start_date = date.today()
