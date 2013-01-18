@@ -29,14 +29,14 @@ class ShibbolethRemoteUserMiddleware(RemoteUserMiddleware):
                 username = hashlib.md5(username).hexdigest()[:30]
 
 
-        # We are seeing this user for the first time in this session, attempt
-        # to authenticate the user.
-        user = auth.authenticate(remote_user=username)
+            # We are seeing this user for the first time in this session, attempt
+            # to authenticate the user.
+            user = auth.authenticate(remote_user=username)
 
-        if user:
-            # User is valid.  Set request.user and persist user in the session
-            # by logging the user in.
-            request.user = user
-            auth.login(request, user)
-            user.set_unusable_password()
-            user.save()
+            if user:
+                # User is valid.  Set request.user and persist user in the session
+                # by logging the user in.
+                request.user = user
+                auth.login(request, user)
+                user.set_unusable_password()
+                user.save()
