@@ -45,11 +45,14 @@ class ShibbolethRemoteUserMiddleware(RemoteUserMiddleware):
                 user.set_unusable_password()
                 user.save()
 
+                account_type = AccountType.objects.get(title="Glow user")
+
                 # Set them up with a profile if one does not exist
                 if not get_object_or_None(UserProfile, user=user):
                     profile = UserProfile.objects.create(
                         user=user,
-                        account_type=UserProfile.MULTI_USER,
+                        user_type=UserProfile.MULTI_USER,
+                        account_type=account_type
                     )
 
                     profile.set_school_name("Glow Scotland School")
@@ -57,7 +60,6 @@ class ShibbolethRemoteUserMiddleware(RemoteUserMiddleware):
                 # Give them the good shit
                 package = SubscriptionPackage.published_to_site.get(title="All of Twig (GLOW)")
                 sub_length = SubscriptionLength.objects.get(title="Glow single day")
-                account_type = AccountType.objects.get(title="Glow user")
 
                 start_date = date.today()
                 end_date = date.today() + timedelta(days=1)
