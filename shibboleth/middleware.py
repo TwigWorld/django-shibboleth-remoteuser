@@ -40,13 +40,3 @@ class ShibbolethRemoteUserMiddleware(RemoteUserMiddleware):
             auth.login(request, user)
             user.set_unusable_password()
             user.save()
-            #call make profile.
-            self.make_profile(user, shib_meta)
-
-    def make_profile(self, user, shib_meta):
-        """
-        This is here as a stub to allow subclassing of ShibbolethRemoteUserMiddleware
-        to include a make_profile method that will create a Django user profile
-        from the Shib provided attributes.  By default it does noting.
-        """
-        return
