@@ -5,7 +5,7 @@ from django.contrib.auth.middleware import RemoteUserMiddleware
 from django.contrib import auth
 from django.core.exceptions import ImproperlyConfigured
 from twig.subscriptions.models import SubscriptionPackage, SubscriptionLength, UserPurchasedPackage
-from twig.users.models import UserProfile
+from twig.users.models import UserProfile, AccountType
 import hashlib
 import re
 
