@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, date
+from annoying.functions import get_object_or_None
 from django.conf import settings
 from django.contrib.auth.middleware import RemoteUserMiddleware
 from django.contrib import auth
