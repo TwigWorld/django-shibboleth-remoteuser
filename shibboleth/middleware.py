@@ -25,50 +25,59 @@ class ShibbolethRemoteUserMiddleware(RemoteUserMiddleware):
         if request.user.is_authenticated():
             return  # Exit early is already authenticated
 
+        username = False
+
         if "AUTH_TYPE" in request.META and request.META["AUTH_TYPE"] == "shibboleth":
-            username = request.META['persistent-id']
+            # Try and find something unique to use as an id
+            if "persistent-id" in request.META:
+                username = request.META['persistent-id']
+            elif "HTTP_SHIB_SESSION_ID" in request.META:
+                username = request.META["HTTP_SHIB_SESSION_ID"]
+            else:
+                return  # can't find shib value in META
 
-            username_regex = re.compile('[^\w.@+-]|.{31}', re.IGNORECASE)
-            if username_regex.match(username):  # invalid username
-                username = hashlib.md5(username).hexdigest()[:30]
+            if username:
+                username_regex = re.compile('[^\w.@+-]|.{31}', re.IGNORECASE)
+                if username_regex.match(username):  # invalid username
+                    username = hashlib.md5(username).hexdigest()[:30]
 
 
-            # We are seeing this user for the first time in this session, attempt
-            # to authenticate the user.
-            user = auth.authenticate(remote_user=username)
+                # We are seeing this user for the first time in this session, attempt
+                # to authenticate the user.
+                user = auth.authenticate(remote_user=username)
 
-            if user:
-                # User is valid.  Set request.user and persist user in the session
-                # by logging the user in.
-                request.user = user
-                auth.login(request, user)
-                user.set_unusable_password()
-                user.save()
+                if user:
+                    # User is valid.  Set request.user and persist user in the session
+                    # by logging the user in.
+                    request.user = user
+                    auth.login(request, user)
+                    user.set_unusable_password()
+                    user.save()
 
-                account_type = AccountType.objects.get(title="Glow user")
+                    account_type = AccountType.objects.get(title="Glow user")
 
-                # Set them up with a profile if one does not exist
-                if not get_object_or_None(UserProfile, user=user):
-                    profile = UserProfile.objects.create(
-                        user=user,
-                        user_type=UserProfile.MULTI_USER,
-                        account_type=account_type
+                    # Set them up with a profile if one does not exist
+                    if not get_object_or_None(UserProfile, user=user):
+                        profile = UserProfile.objects.create(
+                            user=user,
+                            user_type=UserProfile.MULTI_USER,
+                            account_type=account_type
+                        )
+
+                        profile.set_school_name("Glow Scotland School")
+
+                    # Give them the good shit
+                    package = SubscriptionPackage.objects.get(title="All of Twig (GLOW)")
+                    sub_length = SubscriptionLength.objects.get(title="Glow single day")
+
+                    start_date = date.today()
+                    end_date = date.today() + timedelta(days=1)
+
+                    UserPurchasedPackage.objects.create(
+                        user = user,
+                        subscription_package = package,
+                        subscription_length = sub_length,
+                        account_type = account_type,
+                        start_date = start_date,
+                        end_date = end_date
                     )
-
-                    profile.set_school_name("Glow Scotland School")
-
-                # Give them the good shit
-                package = SubscriptionPackage.objects.get(title="All of Twig (GLOW)")
-                sub_length = SubscriptionLength.objects.get(title="Glow single day")
-
-                start_date = date.today()
-                end_date = date.today() + timedelta(days=1)
-
-                UserPurchasedPackage.objects.create(
-                    user = user,
-                    subscription_package = package,
-                    subscription_length = sub_length,
-                    account_type = account_type,
-                    start_date = start_date,
-                    end_date = end_date
-                )
